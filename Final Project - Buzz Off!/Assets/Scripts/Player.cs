@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Creature : MonoBehaviour
+public class Player : MonoBehaviour
 {
     // Manages general player movement
     [Header("Stats")]
@@ -78,7 +78,7 @@ public class Creature : MonoBehaviour
 
         // Normalizes the vector so that the rotation of the camera doesn't affect the vector
         direction = direction.normalized;
-        cc.Move(direction * movementSpeed * Time.deltaTime); 
+        cc.Move(direction * movementSpeed * Time.deltaTime);
     }
 
     // Allows the player to jump
@@ -91,11 +91,5 @@ public class Creature : MonoBehaviour
         }
         audioSource.PlayOneShot(jumpClip);
         gravityVector = new Vector3(0, jumpPower, 0);
-    }
-
-    // Rotates the player based on the camera's position
-    public void RotatePlayerForCamera(Transform cameraTransform)
-    {
-        transform.rotation = cameraTransform.rotation;
     }
 }
