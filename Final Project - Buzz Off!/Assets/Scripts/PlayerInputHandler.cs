@@ -1,12 +1,11 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class PlayerInputHandler : MonoBehaviour
 {
-    
     public Player player;
-
     public ThirdPersonCamera playerCamera;
     
     // Update is called once per frame
@@ -41,6 +40,12 @@ public class PlayerInputHandler : MonoBehaviour
         direction.y = 0;
         
         player.Move(direction);
+
+        // Fires pistol
+        if(Keyboard.current.jKey.wasPressedThisFrame)
+        {
+            player.FirePistol();
+        }
 
         // Reset game for testing purposes
         if(Keyboard.current.rKey.wasPressedThisFrame)

@@ -7,8 +7,8 @@ public class ThirdPersonCamera : MonoBehaviour
     float yRotation = 0;
 
     // How fast the camera rotates
-    public float xSpeed = 60f;
-    public float ySpeed = 60f;
+    public float xSpeed = 90f;
+    public float ySpeed = 90f;
 
     // Prevents you from flippinng the camera upside down
     public float maxLookDownAngle = 60;
