@@ -33,6 +33,10 @@ public class PlayerInputHandler : MonoBehaviour
         {
             player.Jump();
         }
+        if(Keyboard.current.shiftKey.isPressed)
+        {
+            player.Dash();
+        }
 
         // Changes the direction based on the camera's rotation
         direction = playerCamera.transform.TransformDirection(direction);
@@ -55,5 +59,6 @@ public class PlayerInputHandler : MonoBehaviour
 
         // Camera Movement
         playerCamera.AdjustRotation(Mouse.current.delta.x.value, Mouse.current.delta.y.value); // Based on player's mouse movement
+        player.RotateForCamera(playerCamera.transform.rotation.y);
     }
 }

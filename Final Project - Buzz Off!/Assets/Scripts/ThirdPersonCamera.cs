@@ -20,7 +20,6 @@ public class ThirdPersonCamera : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked; // Locks the camera inside the game window
     }
 
-    // Update is called once per frame
     public void AdjustRotation(float xDelta, float yDelta)
     {
         // Adjusts the values based on how fast the camera can rotate

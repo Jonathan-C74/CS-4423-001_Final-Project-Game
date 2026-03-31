@@ -3,17 +3,25 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // Helps with dash method
+    public Transform cameraTransform;
+    
     // Manages general player movement
     [Header("Stats")]
     public float movementSpeed = 5;
     public float rotateSpeed = 10;
     public float jumpPower = 10f;
+    // How long you can hover / how many times you can dash before needing to rest
+    public float maxWingMeter = 3;
+    public float curWingMeter; // TEMPORARILY MAKE PUBLIC
 
     // Manages gravity of the player
     [Header("Gravity")]
     public Transform groundCheck; // Position below the player to check if on ground
     public LayerMask groundMask; // The mask associated with walkable objects
     public float gravityAccel; // How fast the player accelerates to the ground
+    public float maxGravityAccel = -19.8f; // The fastest the player is allowed to fall
+    public float maxHoverAccel = -3; // The fastest the player is allowed to fall while hovering
     Vector3 gravityVector;
     CharacterController cc; // Helps move the player
 
@@ -25,7 +33,10 @@ public class Player : MonoBehaviour
     // Manages pistol
     [Header("Pistol")]
     public Pistol pistol;
+
+    // Booleans for movement options
     bool isGrappling = false; // Used to prevent player from moving while grappling
+    bool isDashing = false; // Used to prevent player from moving while dashing
 
     // Accesses all the components of the player
     void Awake()
@@ -37,14 +48,31 @@ public class Player : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // Set the gravity of the player
+        // Set the gravity of the player and current wing meter
         gravityVector = new Vector3(0, -2, 0);
+        curWingMeter = maxWingMeter;
     }
 
     // Update is called once per frame
     void Update()
     {
         SimulateGravity();
+
+        // Sets the wing meter exactly to 0 or maxWingMeter
+        if(curWingMeter < 0)
+        {
+            curWingMeter = 0;
+        }
+        else if(curWingMeter > maxWingMeter)
+        {
+            curWingMeter = maxWingMeter;
+        }
+
+        // Refreshes the wing meter while on the ground and less than the maximum wing meter
+        if(OnGround() && curWingMeter < maxWingMeter)
+        {
+            curWingMeter += 2 * Time.deltaTime;
+        }
     }
 
     // Checks if the player is on the ground
@@ -63,8 +91,8 @@ public class Player : MonoBehaviour
     // Simulates gravity
     public void SimulateGravity()
     {
-        // Doesn't simulate gravity while grappling
-        if(isGrappling)
+        // Doesn't simulate gravity while grappling or dashing
+        if(isGrappling || isDashing)
         {
             return;
         }
@@ -76,14 +104,21 @@ public class Player : MonoBehaviour
         }
 
         gravityVector.y += gravityAccel * Time.deltaTime; // Accelerates the player the longer they are in the air
-        cc.Move(gravityVector * Time.deltaTime); // Moves the player down
+        
+        // Prevents the player from falling past max acceleration
+        if(gravityVector.y <= maxGravityAccel)
+        {
+            gravityVector.y = maxGravityAccel;
+        }
+
+        cc.Move(gravityVector * Time.deltaTime); // Moves the player down over time
     }
 
     // Moves the player in a direction
     public void Move(Vector3 direction)
     {
-        // Doesn't continue if the player is not moving or is grappling
-        if(direction == Vector3.zero || isGrappling)
+        // Doesn't continue if the player is not moving, is grappling, or is dashing
+        if(direction == Vector3.zero || isGrappling || isDashing)
         {
             return;
         }
@@ -96,13 +131,45 @@ public class Player : MonoBehaviour
     // Allows the player to jump
     public void Jump()
     {
-        // You can't jump if you're off the ground
+        // Calls the hover method if you're off the ground
         if(!OnGround())
         {
+            Hover();
             return;
         }
         audioSource.PlayOneShot(jumpClip);
         gravityVector = new Vector3(0, jumpPower, 0);
+    }
+
+    // Allows the player to hover when trying to jump while not on the ground
+    void Hover()
+    {
+        // Doesn't continue if the player is grappling, their wing meter is depleted, or if they are moving upwards from jumping
+        if(isGrappling || curWingMeter <= 0 || gravityVector.y > 0)
+        {
+            return;
+        }
+
+        // Decrements the wing meter
+        curWingMeter -= Time.deltaTime;
+        
+        // Decelarates the player while their acceleration is faster than the maximum hover acceleration
+        if(gravityVector.y < maxHoverAccel)
+        {
+            gravityVector.y -= 4 * gravityAccel * Time.deltaTime;
+        }
+        
+        // Keeps the player's accelaration from going faster than max hover acceleration
+        Mathf.Clamp(gravityVector.y, maxHoverAccel, 0);
+        
+        cc.Move(gravityVector * Time.deltaTime); // Moves the player down over time
+    }
+
+    // Rotates the player model
+    public void RotateForCamera(float yRotation)
+    {
+        yRotation *= Time.deltaTime;
+        transform.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 
     // Fires pistol
@@ -123,24 +190,18 @@ public class Player : MonoBehaviour
         StartCoroutine(GrappleRoutine(enemy)); // Starts coroutine for grapple
     }
 
-    // Helper function for Grapple() to move player to the target position
-    void GrappleTowards(Vector3 target)
-    {
-        Vector3 moveVector = target - transform.position;
-        moveVector = moveVector.normalized;
-        cc.Move(moveVector * movementSpeed * Time.deltaTime);
-    }
-
     IEnumerator GrappleRoutine(GameObject enemy)
     {
-        // Disables player from moving with keyboard and doubles speed
+        // Disables player from moving with keyboard, doubles speed, and resets acceleration
         isGrappling = true;
         movementSpeed *= 2;
+        gravityVector.y = -2;
+
 
         // While there is distance between the player and target...
         while(Vector3.Distance(transform.position, enemy.transform.position) > 1)
         {
-            GrappleTowards(enemy.transform.position); // Move towards the target
+            MoveTowards(enemy.transform.position); // Move towards the target
             yield return null;
         }
 
@@ -150,5 +211,53 @@ public class Player : MonoBehaviour
         movementSpeed /= 2;
 
         yield return null;
+    }
+
+    // Moves player forward for a short time
+    public void Dash()
+    {
+        // Prevents player from dashing more than once
+        if(isDashing)
+        {
+            return;
+        }
+
+        StartCoroutine(DashRoutine()); // Starts coroutine for dashing
+    }
+
+    IEnumerator DashRoutine()
+    {
+        // Disables player from moving with keyboard, doubles speed, and resets gravity acceleration
+        isDashing = true;
+        movementSpeed *= 2;
+        gravityVector.y = -2;
+
+
+        // Dash for half a second
+        float dashTimer = 0.5f;
+        while(dashTimer > 0)
+        {
+            
+            Vector3 forward = cameraTransform.localPosition;
+            forward.z += 1;
+            MoveTowards(forward); // Move forwards
+
+            dashTimer -= Time.deltaTime;
+            yield return null;
+        }
+
+        // Reenable keyboard movement and reset speed
+        isDashing = false;
+        movementSpeed /= 2;
+
+        yield return null;
+    }
+
+    // Helper function for Grapple() and Dash() to move player to the target position
+    void MoveTowards(Vector3 target)
+    {
+        Vector3 moveVector = target - transform.position;
+        moveVector = moveVector.normalized;
+        cc.Move(moveVector * movementSpeed * Time.deltaTime);
     }
 }
