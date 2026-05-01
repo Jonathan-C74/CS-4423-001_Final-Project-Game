@@ -29,7 +29,7 @@ public class PlayerInputHandler : MonoBehaviour
         {
             direction.x += 1;
         }
-        if(Keyboard.current.spaceKey.isPressed)
+        if(Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             player.Jump();
         }
@@ -59,6 +59,6 @@ public class PlayerInputHandler : MonoBehaviour
 
         // Camera Movement
         playerCamera.AdjustRotation(Mouse.current.delta.x.value, Mouse.current.delta.y.value); // Based on player's mouse movement
-        player.RotateForCamera(playerCamera.transform.rotation.y);
+        player.RotateForCamera(playerCamera.transform);
     }
 }

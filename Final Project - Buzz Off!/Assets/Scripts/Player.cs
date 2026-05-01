@@ -2,10 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
-{
-    // Helps with dash method
-    public Transform cameraTransform;
-    
+{   
     // Manages general player movement
     [Header("Stats")]
     public float movementSpeed = 5;
@@ -29,6 +26,9 @@ public class Player : MonoBehaviour
     [Header("Audio")]
     AudioSource audioSource; // Plays the audio
     public AudioClip jumpClip;
+    public AudioClip shootClip;
+    public AudioClip dashClip;
+    public AudioClip grappleClip;
 
     // Manages pistol
     [Header("Pistol")]
@@ -166,15 +166,15 @@ public class Player : MonoBehaviour
     }
 
     // Rotates the player model
-    public void RotateForCamera(float yRotation)
+    public void RotateForCamera(Transform cameraTransform)
     {
-        yRotation *= Time.deltaTime;
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
+        transform.rotation = cameraTransform.rotation;
     }
 
     // Fires pistol
     public void FirePistol()
     {
+        audioSource.PlayOneShot(shootClip);
         pistol.Shoot();
     }
 
@@ -192,6 +192,9 @@ public class Player : MonoBehaviour
 
     IEnumerator GrappleRoutine(GameObject enemy)
     {
+        // Plays grapple sound
+        audioSource.PlayOneShot(grappleClip);
+        
         // Disables player from moving with keyboard, doubles speed, and resets acceleration
         isGrappling = true;
         movementSpeed *= 2;
@@ -217,16 +220,17 @@ public class Player : MonoBehaviour
     public void Dash()
     {
         // Prevents player from dashing more than once
-        if(isDashing)
+        if(isDashing || curWingMeter <= 0)
         {
             return;
         }
-
+        curWingMeter -= 1;
+        audioSource.PlayOneShot(dashClip);
         StartCoroutine(DashRoutine()); // Starts coroutine for dashing
     }
 
     IEnumerator DashRoutine()
-    {
+    {   
         // Disables player from moving with keyboard, doubles speed, and resets gravity acceleration
         isDashing = true;
         movementSpeed *= 2;
@@ -237,12 +241,11 @@ public class Player : MonoBehaviour
         float dashTimer = 0.5f;
         while(dashTimer > 0)
         {
-            
-            Vector3 forward = cameraTransform.localPosition;
-            forward.z += 1;
+            // Takes the pistols position, which is in front of them 
+            Vector3 forward = pistol.transform.position;
             MoveTowards(forward); // Move forwards
 
-            dashTimer -= Time.deltaTime;
+            dashTimer -= Time.deltaTime; // Decrement timer
             yield return null;
         }
 
