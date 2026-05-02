@@ -5,18 +5,20 @@ public class Player : MonoBehaviour
 {   
     // Manages general player movement
     [Header("Stats")]
-    public float movementSpeed = 5;
+    public float movementSpeed = 10;
     public float rotateSpeed = 10;
     public float jumpPower = 10f;
     // How long you can hover / how many times you can dash before needing to rest
     public float maxWingMeter = 3;
-    public float curWingMeter; // TEMPORARILY MAKE PUBLIC
+    float curWingMeter;
+    // Player model
+    public GameObject playerModel;
 
     // Manages gravity of the player
     [Header("Gravity")]
     public Transform groundCheck; // Position below the player to check if on ground
     public LayerMask groundMask; // The mask associated with walkable objects
-    public float gravityAccel; // How fast the player accelerates to the ground
+    public float gravityAccel = -19.8f; // How fast the player accelerates to the ground
     public float maxGravityAccel = -19.8f; // The fastest the player is allowed to fall
     public float maxHoverAccel = -3; // The fastest the player is allowed to fall while hovering
     Vector3 gravityVector;
@@ -165,10 +167,10 @@ public class Player : MonoBehaviour
         cc.Move(gravityVector * Time.deltaTime); // Moves the player down over time
     }
 
-    // Rotates the player model
+    // Rotates the player model but not the entire object
     public void RotateForCamera(Transform cameraTransform)
     {
-        transform.rotation = cameraTransform.rotation;
+        playerModel.transform.rotation = cameraTransform.rotation;
     }
 
     // Fires pistol
@@ -176,6 +178,13 @@ public class Player : MonoBehaviour
     {
         audioSource.PlayOneShot(shootClip);
         pistol.Shoot();
+    }
+
+    // Throws a grenade
+    public void ThrowGrenade()
+    {
+        audioSource.PlayOneShot(shootClip);
+        pistol.Grenade();
     }
 
     // Moves player to shot target
@@ -190,7 +199,7 @@ public class Player : MonoBehaviour
         StartCoroutine(GrappleRoutine(enemy)); // Starts coroutine for grapple
     }
 
-    IEnumerator GrappleRoutine(GameObject enemy)
+    IEnumerator GrappleRoutine(GameObject target)
     {
         // Plays grapple sound
         audioSource.PlayOneShot(grappleClip);
@@ -202,13 +211,13 @@ public class Player : MonoBehaviour
 
 
         // While there is distance between the player and target...
-        while(Vector3.Distance(transform.position, enemy.transform.position) > 1)
+        while(Vector3.Distance(transform.position, target.transform.position) > 1)
         {
-            MoveTowards(enemy.transform.position); // Move towards the target
+            MoveTowards(target.transform.position); // Move towards the target
             yield return null;
         }
 
-        Destroy(enemy); // Destroy the target when you come in contact
+        Destroy(target); // Destroy the target when you come in contact
         // Reenable keyboard movement and reset speed
         isGrappling = false;
         movementSpeed /= 2;

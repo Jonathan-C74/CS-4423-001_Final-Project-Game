@@ -29,11 +29,11 @@ public class PlayerInputHandler : MonoBehaviour
         {
             direction.x += 1;
         }
-        if(Keyboard.current.spaceKey.wasPressedThisFrame)
+        if(Keyboard.current.spaceKey.isPressed)
         {
             player.Jump();
         }
-        if(Keyboard.current.shiftKey.isPressed)
+        if(Keyboard.current.shiftKey.wasPressedThisFrame)
         {
             player.Dash();
         }
@@ -46,9 +46,14 @@ public class PlayerInputHandler : MonoBehaviour
         player.Move(direction);
 
         // Fires pistol
-        if(Keyboard.current.jKey.wasPressedThisFrame)
+        if(Mouse.current.leftButton.wasPressedThisFrame)
         {
             player.FirePistol();
+        }
+        // Throws grenade
+        if(Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            player.ThrowGrenade();
         }
 
         // Reset game for testing purposes

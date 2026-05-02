@@ -34,7 +34,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1605617807605876075}
   - {fileID: 8335803602577312673}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -110,12 +109,19 @@ MonoBehaviour:
   movementSpeed: 10
   rotateSpeed: 10
   jumpPower: 10
-  groundCheck: {fileID: 1605617807605876075}
+  maxWingMeter: 3
+  curWingMeter: 0
+  groundCheck: {fileID: 0}
   groundMask:
     serializedVersion: 2
     m_Bits: 64
   gravityAccel: -19.6
+  maxGravityAccel: -19.8
+  maxHoverAccel: -3
   jumpClip: {fileID: 0}
+  shootClip: {fileID: 0}
+  dashClip: {fileID: 0}
+  grappleClip: {fileID: 0}
   pistol: {fileID: 999560498706748058}
 --- !u!143 &8136541135558553755
 CharacterController:
@@ -239,37 +245,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!1 &4713428493237178467
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1605617807605876075}
-  m_Layer: 0
-  m_Name: GroundCheck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1605617807605876075
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4713428493237178467}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.045, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6217868479524701764}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1402433145234309705
 PrefabInstance:
   m_ObjectHideFlags: 0

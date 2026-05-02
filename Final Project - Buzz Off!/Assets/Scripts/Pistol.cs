@@ -6,15 +6,25 @@ public class Pistol : MonoBehaviour
     public float bulletSpeed = 10;
     public float lifetime = 10;
     public GameObject bulletPrefab; // Reference to bullet object
+    public GameObject grenadePrefab; // Reference to grenade object
     public Transform spawnTransform; // Reference to where the bullet starts
 
     [Header("Aiming")]
     public ThirdPersonCamera aim; // Reference to camera to adjust bullet's trajectory
     
+    // Shoots a bullet
     public void Shoot()
     {
         GameObject newBullet = Instantiate(bulletPrefab, spawnTransform.position, transform.rotation); // Create a new bullet
         newBullet.GetComponent<Rigidbody>().linearVelocity = aim.transform.forward * bulletSpeed; // Access the bullet's Rigidbody to make it move forward based on camera rotation
         Destroy(newBullet, lifetime); // Destroy the bullet after a certain amount of time
+    }
+
+    // Throws a grenade
+    public void Grenade()
+    {
+        GameObject newGrenade = Instantiate(grenadePrefab, spawnTransform.position, transform.rotation); // Create a new grenade
+        newGrenade.GetComponent<Rigidbody>().linearVelocity = aim.transform.forward * bulletSpeed; // Access the grenade's Rigidbody to make it move forward based on camera rotation
+        Destroy(newGrenade, lifetime); // Destroy the grenade after a certain amount of time
     }
 }
