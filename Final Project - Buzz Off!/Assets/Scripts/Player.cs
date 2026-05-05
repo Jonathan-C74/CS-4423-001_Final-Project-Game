@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {   
@@ -188,7 +189,7 @@ public class Player : MonoBehaviour
     }
 
     // Moves player to shot target
-    public void Grapple(GameObject enemy)
+    public void Grapple(GameObject enemy, float cutOffRange)
     {
         // Prevents player from grappling more than once
         if(isGrappling)
@@ -196,10 +197,10 @@ public class Player : MonoBehaviour
             return;
         }
 
-        StartCoroutine(GrappleRoutine(enemy)); // Starts coroutine for grapple
+        StartCoroutine(GrappleRoutine(enemy, cutOffRange)); // Starts coroutine for grapple
     }
 
-    IEnumerator GrappleRoutine(GameObject target)
+    IEnumerator GrappleRoutine(GameObject target, float cutOffRange)
     {
         // Plays grapple sound
         audioSource.PlayOneShot(grappleClip);
@@ -211,7 +212,7 @@ public class Player : MonoBehaviour
 
 
         // While there is distance between the player and target...
-        while(Vector3.Distance(transform.position, target.transform.position) > 1)
+        while(Vector3.Distance(transform.position, target.transform.position) > cutOffRange)
         {
             MoveTowards(target.transform.position); // Move towards the target
             yield return null;
@@ -271,5 +272,16 @@ public class Player : MonoBehaviour
         Vector3 moveVector = target - transform.position;
         moveVector = moveVector.normalized;
         cc.Move(moveVector * movementSpeed * Time.deltaTime);
+    }
+
+    // Ends the level when the goal is reached
+    void OnTriggerEnter(Collider other)
+    {
+        if(!other.CompareTag("Goal"))
+        {
+            return;
+        }
+
+        SceneManager.LoadScene("WinScene");
     }
 }

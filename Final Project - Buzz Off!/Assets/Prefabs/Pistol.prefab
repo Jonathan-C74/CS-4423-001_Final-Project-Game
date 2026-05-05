@@ -270,7 +270,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b322f50ab081420b9f15d46a3ef4667, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  bulletSpeed: 10
+  bulletSpeed: 50
   lifetime: 10
   bulletPrefab: {fileID: 5777296666268118656, guid: 4c03a7db903e2429e878d26734d849fe, type: 3}
+  grenadePrefab: {fileID: 8996857992162673732, guid: 17ec605cb63794bdab9e0aa83ed03ec4, type: 3}
   spawnTransform: {fileID: 8275047857472207680}
+  aim: {fileID: 0}
